@@ -1,16 +1,14 @@
-# Compiled class file
+### Java ###
 *.class
-
-# Log file
 *.log
-
-# BlueJ files
 *.ctxt
+hs_err_pid*
+replay_pid*
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files #
+# Package Files
 *.jar
 *.war
 *.nar
@@ -19,6 +17,71 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+### IDE & Editor ###
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# Mac & Windows
+.DS_Store
+Thumbs.db
+
+### Build tools ###
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+gradle-app.setting
+
+### Spring Boot / Environment ###
+# Application secrets
+application-*.yml
+application-*.yaml
+application-*.properties
+.env
+.env.*
+
+# Local override configs
+*.local.yml
+*.local.yaml
+*.local.properties
+
+# Security keys
+*.pem
+*.key
+*.crt
+*.der
+*.p12
+*.jks
+
+### Docker ###
+/docker-compose.override.yml
+.docker/
+.dockerignore
+
+### Logs & Temp ###
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Node modules (if you add a frontend later)
+node_modules/
+dist/
