@@ -16,6 +16,27 @@ services:
     networks:
       - spotify-clone-network
 
+  stream-service:
+    build: 
+      context: stream-service
+      dockerfile: Dockerfile
+    image: stream-service
+    container_name: stream-service
+    ports:
+      - "8080:8080"
+    environment:
+      OBJECT_STORAGE_PROVIDER: ${PROVIDER}
+      OBJECT_STORAGE_ENDPOINT: ${ENDPOINT}
+      OBJECT_STORAGE_ACCESS_KEY: ${ACCESS_KEY}
+      OBJECT_STORAGE_SECRET_KEY: ${SECRET_KEY}
+      OBJECT_STORAGE_REGION: ${REGION}
+      OBJECT_STORAGE_BUCKET_NAME: ${BUCKET_NAME}
+      OBJECT_STORAGE_PRESIGNED_URL_EXPIRATION_MINUTES: ${PRESIGNED_URL_EXPIRATION_MINUTES}
+    networks:
+      - spotify-clone-network
+    depends_on:
+      - minio
+
 networks:
   spotify-clone-network:
     name: spotify-clone-network
