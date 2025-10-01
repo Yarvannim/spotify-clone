@@ -19,10 +19,7 @@ services:
       - spotify-clone-network
 
   stream-service:
-    build: 
-      context: stream-service
-      dockerfile: Dockerfile
-    image: stream-service
+    image: ghcr.io/Yarvannim/Spotify-clone/stream-service:latest
     container_name: stream-service
     ports:
       - "8080:8080"
