@@ -1,0 +1,50 @@
+name: Service CI
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        required: true
+        type: string
+      service-path:
+        required: true
+        type: string
+      test-command:
+        required: false
+        type: string
+        default: "echo 'No tests specified'"
+
+jobs:
+  service-ci:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}/${{ inputs.service-name }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build docker image
+        run: |
+          cd ${{ inputs.service-path }}
+          docker build -t ${{ inputs.service-name }}:test .
+
+      - name: Run service specific tests
+        run: |
+          cd ${{ inputs.service-path }}
+          ${{ inputs.test-command }}
+
+      - name: Login to Github Container Registry 
+        if: github.ref == 'refs/heads/main' && success()
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push to container registry
+        if: github.ref == 'refs/heads/main' && success()
+        run: |
+          docker tag ${{ inputs.service-name }}:test ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}:latest
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest 

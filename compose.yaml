@@ -10,11 +10,32 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_SERVER_URL: http://localhost:9000
     volumes:
       - spotify-clone-minio-object-storage:/data
-    command: server /data --console-address ":9001"
+      - ./scripts/initialize_minio.sh:/initialize.sh
+    entrypoint: ["/bin/sh", "/initialize.sh"]
     networks:
       - spotify-clone-network
+
+  stream-service:
+    image: ghcr.io/Yarvannim/Spotify-clone/stream-service:latest
+    container_name: stream-service
+    ports:
+      - "8080:8080"
+    environment:
+      OBJECT_STORAGE_PROVIDER: ${PROVIDER}
+      OBJECT_STORAGE_ENDPOINT: ${ENDPOINT}
+      OBJECT_STORAGE_ACCESS_KEY: ${ACCESS_KEY}
+      OBJECT_STORAGE_SECRET_KEY: ${SECRET_KEY}
+      OBJECT_STORAGE_REGION: ${REGION}
+      OBJECT_STORAGE_BUCKET_NAME: ${BUCKET_NAME}
+      OBJECT_STORAGE_PRESIGNED_URL_EXPIRATION_MINUTES: ${PRESIGNED_URL_EXPIRATION_MINUTES}
+    networks:
+      - spotify-clone-network
+    depends_on:
+      - minio
+    pull_policy: always
 
 networks:
   spotify-clone-network:
