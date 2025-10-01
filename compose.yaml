@@ -35,6 +35,7 @@ services:
       - spotify-clone-network
     depends_on:
       - minio
+    pull_policy: always
 
 networks:
   spotify-clone-network:
