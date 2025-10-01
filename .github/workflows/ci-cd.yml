@@ -8,7 +8,7 @@ on:
 
 jobs:
   detect-changes:
-    runs-on: ubuntu.latest
+    runs-on: ubuntu-latest
     outputs:
       stream-service: ${{ steps.filter.outputs.stream-service }}
     steps:
