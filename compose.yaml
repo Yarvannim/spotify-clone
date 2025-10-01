@@ -19,7 +19,7 @@ services:
       - spotify-clone-network
 
   stream-service:
-    image: ghcr.io/Yarvannim/Spotify-clone/stream-service:latest
+    image: ghcr.io/yarvannim/spotify-clone/stream-service:latest
     container_name: stream-service
     ports:
       - "8080:8080"

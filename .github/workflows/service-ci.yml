@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}/${{ inputs.service-name }}
+      IMAGE_NAME: yarvannim/spotify-clone/${{ inputs.service-name }}
 
     steps:
       - name: Checkout code
