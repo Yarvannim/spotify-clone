@@ -70,6 +70,6 @@ public class MinioStorageService implements ObjectStorageService {
 
     @Override
     public String getServiceName() {
-        return "Minio";
+        return "Minio object storage";
     }
 }
