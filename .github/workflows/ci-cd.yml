@@ -27,3 +27,6 @@ jobs:
     with:
       service-name: stream-service
       service-path: ./stream-service
+      dockerfile-path: ./stream-service/Dockerfile
+      enable-test: false
+    secrets: inherit

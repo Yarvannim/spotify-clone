@@ -1,23 +1,30 @@
-FROM eclipse-temurin:24-jdk AS builder
+FROM --platform=$BUILDPLATFORM gradle:8.10.2-jdk24-alpine AS builder
 WORKDIR /app
 
-COPY gradlew .
-COPY gradle gradle
-COPY build.gradle .
-COPY settings.gradle .
+COPY build.gradle settings.gradle gradle.properties ./
+COPY gradle/wrapper gradle/wrapper
 
-COPY src src
+RUN ./gradlew dependencies --no-daemon
 
-RUN ./gradlew bootJar
+COPY src ./src
+
+RUN ./gradlew bootJar --no-daemon
+
+RUN java -Djarmode=layertools -jar build/libs/*.jar --destination extracted
 
 FROM eclipse-temurin:24-jre-alpine AS image
 
-ARG JAR_FILE=/app/build/libs/*.jar
+RUN addgroup -S spring && adduser -S spring -G spring
 
 WORKDIR /app
 
-COPY --from=builder ${JAR_FILE} app.jar
+COPY --from=builder --chown=spring:spring /app/extracted/dependencies/ ./
+COPY --from=builder --chown=spring:spring /app/extracted/spring-boot-loader/ ./
+COPY --from=builder --chown=spring:spring /app/extracted/snapshot-dependencies/ ./
+COPY --from=builder --chown=spring:spring /app/extracted/application/ ./
+
+USER spring
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-XX:TieredStopAtLevel=1", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:+UseZGC", "-Djava.security.egd=file:/dev/./urandom", "org.springframework.boot.loader.JarLauncher"]
