@@ -34,16 +34,8 @@ on:
         default: false
 
 jobs:
-  Build-and-Test:
+  test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      security-events: write
-    env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: yarvannim/spotify-clone/${{ inputs.service-name }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -65,13 +57,35 @@ jobs:
         run: |
           cd ${{ inputs.service-path }}
           ${{ inputs.test-command }}
+  build-and-push-image:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: yarvannim/spotify-clone/${{ inputs.service-name }}
+      FULL_IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ inputs.service-name }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ inputs.service-name }}-
+
       - name: Build docker image for testing
         uses: docker/build-push-action@v5
         with:
@@ -80,9 +94,14 @@ jobs:
           platforms: linux/amd64
           push: false
           load: true
-          tags: ${{ inputs.service-name }}:test
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: ${{ inputs.service-name }}:test, ${{ env.FULL_IMAGE_NAME }}:latest
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          outputs: type=docker,dest=/tmp/image.tar
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Run Trivy vulnerability scanner
         if: inputs.enable-security-scan
@@ -99,7 +118,7 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-      - name: Login to Github Container Registry 
+      - name: Login to Github Container Registry
         if: github.ref == 'refs/heads/main' && success()
         uses: docker/login-action@v3
         with:
@@ -115,7 +134,5 @@ jobs:
           file: ${{ inputs.service-path }}/${{ inputs.dockerfile-path }}
           platforms: ${{ inputs.platforms }}
           push: true
-          tags: ${{ env.IMAGE_NAME }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
+          tags: ${{ env.FULL_IMAGE_NAME }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
