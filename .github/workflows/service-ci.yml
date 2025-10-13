@@ -9,14 +9,37 @@ on:
       service-path:
         required: true
         type: string
+      service-type:
+        required: true
+        type: string
+      dockerfile-path:
+        required: true
+        type: string
+        default: 'Dockerfile'
+      build-command:
+        required: true
+        type: string
+        default: "echo 'No build command specified'"
       test-command:
-        required: false
+        required: true
         type: string
         default: "echo 'No tests specified'"
+      platforms:
+        required: false
+        type: string
+        default: "linux/amd64,linux/arm64"
+      enable-security-scan:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
-  service-ci:
+  Build-and-Test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: yarvannim/spotify-clone/${{ inputs.service-name }}
@@ -24,16 +47,57 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Build docker image
+
+      - name: Set up build environment for Java
+        if: inputs.service-type == 'java'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '24'
+          cache: 'gradle'
+
+      - name: Build service
         run: |
           cd ${{ inputs.service-path }}
-          docker build -t ${{ inputs.service-name }}:test .
+          ${{ inputs.build-command }}
 
-      - name: Run service specific tests
+      - name: Run tests
         run: |
           cd ${{ inputs.service-path }}
           ${{ inputs.test-command }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build docker image for testing
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ inputs.service-path }}
+          file: ${{ inputs.service-path }}/${{ inputs.dockerfile-path }}
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: ${{ inputs.service-name }}:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scanner
+        if: inputs.enable-security-scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ inputs.service-name }}:test
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        if: inputs.enable-security-scan
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
 
       - name: Login to Github Container Registry 
         if: github.ref == 'refs/heads/main' && success()
@@ -43,8 +107,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push to container registry
-        if: github.ref == 'refs/heads/main' && success()
-        run: |
-          docker tag ${{ inputs.service-name }}:test ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}:latest
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest 
+      - name: Build and push docker image
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && success()
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ inputs.service-path }}
+          file: ${{ inputs.service-path }}/${{ inputs.dockerfile-path }}
+          platforms: ${{ inputs.platforms }}
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+

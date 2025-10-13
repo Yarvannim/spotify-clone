@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, development]
   pull_request:
-    branches: [main]
+    branches: [main, development]
 
 jobs:
   detect-changes:
@@ -12,8 +12,11 @@ jobs:
     outputs:
       stream-service: ${{ steps.filter.outputs.stream-service }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v2
         id: filter
         with:
           filters: |
@@ -24,6 +27,17 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.stream-service == 'true'
     uses: ./.github/workflows/service-ci.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
     with:
       service-name: stream-service
       service-path: ./stream-service
+      service-type: java
+      dockerfile-path: 'Dockerfile'
+      build-command: './gradlew build'
+      test-command: './gradlew test'
+      platforms: linux/amd64,linux/arm64
+      enable-security-scan: true
