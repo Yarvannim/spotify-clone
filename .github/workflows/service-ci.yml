@@ -43,6 +43,7 @@ jobs:
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: yarvannim/spotify-clone/${{ inputs.service-name }}
+      FULL_IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
     steps:
       - name: Checkout code
@@ -115,7 +116,7 @@ jobs:
           file: ${{ inputs.service-path }}/${{ inputs.dockerfile-path }}
           platforms: ${{ inputs.platforms }}
           push: true
-          tags: ${{ env.IMAGE_NAME }}:latest
+          tags: ${{ env.FULL_IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
