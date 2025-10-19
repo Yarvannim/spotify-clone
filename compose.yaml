@@ -1,6 +1,45 @@
 name: spotify-clone
 
 services:
+  cassandra:
+    image: cassandra:5.0
+    container_name: cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      CASSANDRA_CLUSTER_NAME: SpotifyCluster
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_RACK: rack1
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+      CASSANDRA_NUM_TOKENS: 32
+      MAX_HEAP_SIZE: 2G
+      HEAP_NEWSIZE: 800M
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+      - ./scripts/init.cql:/init_files/init.cql:ro
+    networks:
+      - spotify-clone-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.1
+    container_name: keycloak
+    ports:
+      - "8080:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: dev-file
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./scripts/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    command: start-dev --import-realm
+    depends_on:
+      - cassandra
+    networks:
+      - spotify-clone-network
+
   minio:
     image: quay.io/minio/minio:latest
     container_name: minio
@@ -19,10 +58,14 @@ services:
       - spotify-clone-network
 
   stream-service:
-    image: ghcr.io/yarvannim/spotify-clone/stream-service:latest
+    #image: ghcr.io/yarvannim/spotify-clone/stream-service:latest
+    image: stream-service:local
+    build:
+      context: ./stream-service
+      dockerfile: Dockerfile
     container_name: stream-service
     ports:
-      - "8080:8080"
+      - "8008:8008"
     environment:
       OBJECT_STORAGE_PROVIDER: ${PROVIDER}
       OBJECT_STORAGE_ENDPOINT: ${ENDPOINT}
@@ -35,6 +78,8 @@ services:
       - spotify-clone-network
     depends_on:
       - minio
+      - cassandra
+      - keycloak
     pull_policy: always
 
 networks:
@@ -45,5 +90,8 @@ networks:
 volumes:
   spotify-clone-minio-object-storage:
     name: spotify-clone-minio-object-storage
-
+  keycloak_data:
+    name: keycloak_data
+  cassandra_data:
+    name: cassandra_data
 
