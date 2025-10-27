@@ -23,6 +23,6 @@ USER appuser
 
 ENV JAVA_OPTS="-XX:TieredStopAtLevel=1 -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom"
 
-EXPOSE 8080
+EXPOSE 8008
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
