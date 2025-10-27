@@ -6,6 +6,7 @@ import com.yarvannim.stream_service.dto.responses.SongSearchResponse;
 import com.yarvannim.stream_service.repository.SongSearchRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 
 import java.util.List;
@@ -16,14 +17,13 @@ import java.util.UUID;
 public class SongSearchService {
     private final SongSearchRepository songSearchRepository;
 
-    public List<SongSearchResponse> fuzzySearch(String query){
-        try {
-            List<SongDocument> songDocuments = songSearchRepository.fuzzySearch(query);
-            return songDocuments.stream().map(this::convertToSafeResponse).toList();
-        } catch (Exception e) {
-            System.out.println("Exception occurred while searching for song: " + e.getMessage());
-            return List.of();
-        }
+    public Flux<SongSearchResponse> fuzzySearch(String query){
+        return songSearchRepository.fuzzySearch(query)
+                .map(this::convertToSafeResponse)
+                .onErrorResume(throwable -> {
+                    System.out.println("Exception occurred while searching for song: " + throwable.getMessage());
+                    return Flux.empty();
+                });
     }
 
     private SongSearchResponse convertToSafeResponse(SongDocument songDocument){

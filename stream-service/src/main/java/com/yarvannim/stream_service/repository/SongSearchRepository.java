@@ -2,11 +2,10 @@ package com.yarvannim.stream_service.repository;
 
 import com.yarvannim.stream_service.domain.document.SongDocument;
 import org.springframework.data.elasticsearch.annotations.Query;
-import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+import org.springframework.data.elasticsearch.repository.ReactiveElasticsearchRepository;
+import reactor.core.publisher.Flux;
 
-import java.util.List;
-
-public interface SongSearchRepository extends ElasticsearchRepository<SongDocument, String>{
+public interface SongSearchRepository extends ReactiveElasticsearchRepository<SongDocument, String> {
 
     @Query("""
     {
@@ -34,5 +33,5 @@ public interface SongSearchRepository extends ElasticsearchRepository<SongDocume
       }
     }
     """)
-    List<SongDocument> fuzzySearch(String query);
+    Flux<SongDocument> fuzzySearch(String query);
 }
