@@ -45,7 +45,7 @@ public class SecurityConfig {
 
                         ).hasAnyAuthority("ROLE_ARTIST")
                         .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN")
-                        .anyRequest().authenticated()
+                        .anyRequest().anonymous()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))

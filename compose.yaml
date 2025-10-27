@@ -1,6 +1,24 @@
 name: spotify-clone
 
 services:
+  vault:
+    image: hashicorp/vault:1.21
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "root-token"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+      VAULT_ADDR: "http://vault:8200"
+      VAULT_API_ADDR: "http://vault:8200"
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - vault_data:/vault/data
+    command: server -dev -dev-root-token-id="root-token"
+    networks:
+      - spotify-clone-network
+
   cassandra:
     image: cassandra:5.0
     container_name: cassandra
@@ -19,6 +37,26 @@ services:
       - ./scripts/init.cql:/init_files/init.cql:ro
     networks:
       - spotify-clone-network
+
+  elasticsearch:
+    image: elasticsearch:8.17.10
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: false
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    networks:
+      - spotify-clone-network
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.4.1
@@ -77,9 +115,14 @@ services:
     networks:
       - spotify-clone-network
     depends_on:
-      - minio
-      - cassandra
-      - keycloak
+      minio:
+        condition: service_started
+      cassandra:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
     pull_policy: always
 
 networks:
@@ -94,4 +137,7 @@ volumes:
     name: keycloak_data
   cassandra_data:
     name: cassandra_data
-
+  elasticsearch_data:
+    name: elasticsearch_data
+  vault_data:
+    name: vault_data
