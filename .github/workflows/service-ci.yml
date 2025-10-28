@@ -32,6 +32,10 @@ on:
         required: false
         type: boolean
         default: false
+      enable-sonarqube:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   test:
@@ -54,9 +58,23 @@ jobs:
           ${{ inputs.build-command }}
 
       - name: Run tests
+        if: inputs.enable-sonarqube
         run: |
           cd ${{ inputs.service-path }}
           ${{ inputs.test-command }}
+
+      - name: Run tests with coverage
+        if: inputs.enable-sonarqube
+        run: |
+          cd ${{ inputs.service-path }}
+          ./gradlew jacocoTestReport
+
+      - name: SonarQube Scan
+        if: inputs.enable-sonarqube
+        run: |
+          cd ${{ inputs.service-path }}
+          ./gradlew sonarqube -Dsonar.token=${{ secrets.SONAR_TOKEN }} 
+
   build-and-push-image:
     needs: test
     runs-on: ubuntu-latest
