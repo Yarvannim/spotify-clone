@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: stream-service
+  config:
+    import: "vault://"  # This enables Vault configuration
+  cloud:
+    vault:
+      uri: ${SPRING_CLOUD_VAULT_URI:http://localhost:8200}
+      token: ${SPRING_CLOUD_VAULT_TOKEN:root-token}
+      kv:
+        enabled: true
+        backend: secret
+        default-context: applications/stream-service
+      ssl:
+        verification-mode: NONE
+      connection-timeout: 5000
+      read-timeout: 15000
+
+  # Cassandra Configuration (non-sensitive)
+  cassandra:
+    contact-points: cassandra:9042
+    local-datacenter: datacenter1
+    keyspace-name: spotify_clone
+    pool:
+      heartbeat-interval: 30s
+      idle-timeout: 120s
+      max-queue-size: 256
+    ssl:
+      enabled: false
+    schema-action: create-if-not-exists
+    request:
+      timeout: 10s
+      page-size: 5000
+
+  # Security (Keycloak)
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/spotify-clone
+
+  # Elasticsearch
+  elasticsearch:
+    uris: elasticsearch:9200
+    connection-timeout: 1s
+    socket-timeout: 5s
+
+# Custom Application Properties
+
+app:
+  keycloak:
+    client-id: spotify-backend
+    client-secret: ${keycloak.client-secret}  # From Vault
+  frontend:
+    url: http://localhost:3000
+
+object:
+  storage:
+    provider: MINIO
+    endpoint: http://minio:9000
+    access-key: ${minio.access-key}  # From Vault
+    secret-key: ${minio.secret-key}  # From Vault
+    bucket-name: music
+    presigned-url-expiration-minutes: 10
+    region: eu-west-1
+server:
+  port: 8008
