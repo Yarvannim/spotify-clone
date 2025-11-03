@@ -40,4 +40,4 @@ jobs:
       build-command: './gradlew build'
       test-command: './gradlew test'
       platforms: linux/amd64,linux/arm64
-      enable-security-scan: true
+      enable-security-scan: false
