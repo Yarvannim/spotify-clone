@@ -1,10 +1,9 @@
 import type {SongSearchResponse} from "../types/song.ts";
 
 class ApiService {
-    private baseUrl = 'http://localhost:8008'
 
     async getStreamUrl(songId: string): Promise<string> {
-        const response = await fetch(`${this.baseUrl}/api/stream/${songId}`);
+        const response = await fetch(`/api/stream/${songId}`);
         console.log(response)
         if (!response.ok) {
             throw new Error('Failed to fetch stream URL');
@@ -16,7 +15,7 @@ class ApiService {
     async searchSongs(query: string): Promise<SongSearchResponse[]>{
         if (!query.trim()) return [];
 
-        const response = await fetch(`${this.baseUrl}/api/search?q=${encodeURIComponent(query)}`,
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`,
             {
                 method: 'GET',
                 headers: {
