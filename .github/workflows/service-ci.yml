@@ -52,6 +52,20 @@ jobs:
           java-version: '24'
           cache: 'gradle'
 
+      - name: Set up build environment for React
+        if: inputs.service-type == 'react'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.service-path }}/package-lock.json
+
+      - name: Install dependencies for React
+        if: inputs.service-type == 'react'
+        run: |
+          cd ${{ inputs.service-path }}
+          npm ci
+
       - name: Build service
         run: |
           cd ${{ inputs.service-path }}
