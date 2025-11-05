@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       stream-service: ${{ steps.filter.outputs.stream-service }}
+      react-client: ${{ steps.filter.outputs.react-client }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,6 +23,8 @@ jobs:
           filters: |
             stream-service:
               - 'stream-service/**'
+            react-client:
+              - 'react-client/**'
 
   stream-service:
     needs: detect-changes
@@ -40,4 +43,23 @@ jobs:
       build-command: './gradlew build'
       test-command: './gradlew test'
       platforms: linux/amd64,linux/arm64
+      enable-security-scan: false
+
+  react-client:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.react-client == 'true'
+    uses: ./.github/workflows/service-ci.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    with:
+      service-name: react-client
+      service-path: ./react-client
+      service-type: react
+      dockerfile-path: 'Dockerfile'
+      build-command: 'npm run build'
+      test-command: 'npm run build'
+      platforms: 'linux/amd64,linux/arm64'
       enable-security-scan: false
