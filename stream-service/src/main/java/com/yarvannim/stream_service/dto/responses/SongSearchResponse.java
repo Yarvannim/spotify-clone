@@ -12,7 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class SongSearchResponse {
-    private UUID songId;
+    private UUID id;
     private String title;
     private String artist;
 }

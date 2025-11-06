@@ -1,9 +1,13 @@
 import { useState, useCallback} from "react";
 import {SearchBar} from "./components/SearchBar.tsx";
 import {SongStream} from "./components/SongStream.tsx";
+import {useAuth} from "./auth/AuthContext.tsx";
+import {UserProfile} from "./components/UserProfile.tsx";
+import {LoginButton} from "./components/LoginButton.tsx";
 
 function App() {
     const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
+    const { isAuthenticated } = useAuth();
 
     const handleSongSelect = useCallback((songId: string) => {
         setSelectedSongId(songId);
@@ -19,6 +23,9 @@ function App() {
                     <p className={"text-gray-600 text-lg"}>
                         Discover and listen to your favorite songs.
                     </p>
+                    <div className={"flex items-center gap-4"}>
+                        {isAuthenticated ? <UserProfile/> : <LoginButton/>}
+                    </div>
                 </header>
 
                 <main className={"space-y-12"}>
@@ -27,7 +34,9 @@ function App() {
                     </section>
 
                     <section className={"flex justify-center"}>
-                        <SongStream songId={selectedSongId}/>
+                        {selectedSongId && (
+                                <SongStream songId={selectedSongId}/>
+                        )}
                     </section>
                 </main>
 

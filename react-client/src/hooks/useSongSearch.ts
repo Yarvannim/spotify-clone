@@ -5,7 +5,7 @@ import { apiService} from "../services/api.ts";
 export const useSongSearch = () => {
     const [results, setResults] = useState<SongSearchResponse[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<String | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const search = useCallback(async (query: string) => {
         if (!query.trim()) {
