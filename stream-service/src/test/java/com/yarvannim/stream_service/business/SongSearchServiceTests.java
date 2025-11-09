@@ -41,7 +41,7 @@ public class SongSearchServiceTests {
         // Act & Assert
         StepVerifier.create(songSearchService.fuzzySearch("test"))
                 .expectNextMatches(response ->
-                        response.getSongId().equals(UUID.fromString("123e4567-e89b-12d3-a456-426614174000")) &&
+                        response.getId().equals(UUID.fromString("123e4567-e89b-12d3-a456-426614174000")) &&
                                 response.getTitle().equals("Test Song 1") &&
                                 response.getArtist().equals("Artist 1")
                 )
