@@ -7,12 +7,14 @@ import lombok.Setter;
 
 import java.util.UUID;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
-public class SongSearchResponse {
-    private UUID id;
-    private String title;
-    private String artist;
+public class UserResponse {
+    private UUID userId;
+    private String username;
+    private String displayName;
+    private Boolean isArtist;
+    private String createdAt;
 }

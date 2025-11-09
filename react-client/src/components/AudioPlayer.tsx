@@ -56,19 +56,19 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({songId, streamUrl}) => 
                 >
                     {isPlaying && currentSongId === songId ? (
                         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
+                            <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
                         </svg>
                     ) : (
                         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z" />
+                            <path d="M8 5v14l11-7z"/>
                         </svg>
                     )}
                 </button>
 
                 <div className="flex items-center space-x-3">
-          <span className="text-sm text-gray-500 font-mono min-w-[40px]">
-            {formatTime(currentTime)}
-          </span>
+                  <span className="text-sm text-gray-500 font-mono min-w-[40px]">
+                    {formatTime(currentTime)}
+                  </span>
                     <input
                         type="range"
                         min="0"
@@ -77,9 +77,9 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({songId, streamUrl}) => 
                         onChange={handleSeek}
                         className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-green-500 hover:[&::-webkit-slider-thumb]:bg-green-600"
                     />
-                    <span className="text-sm text-gray-500 font-mono min-w-[40px]">
-            {formatTime(duration)}
-          </span>
+                    <span className="text-sm text-gray-500 font-mono min-w-[40px]">{
+                        formatTime(duration)}
+                    </span>
                 </div>
             </div>
         </div>

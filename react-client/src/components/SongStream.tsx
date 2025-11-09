@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect} from "react";
+import { useState, useEffect} from "react";
 import {apiService} from "../services/api.ts";
 import {AudioPlayer} from "./AudioPlayer.tsx";
+import {useAuth} from "../auth/AuthContext.tsx";
 
 interface SongStreamProps {
     songId: string | null;
@@ -10,32 +11,71 @@ export const SongStream: React.FC<SongStreamProps> = ({songId}) => {
     const [streamUrl, setStreamUrl] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<String | null>(null);
-
-    const loadStreamUrl = useCallback(async (id: string) => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const url = await apiService.getStreamUrl(id);
-            setStreamUrl(url);
-        } catch (error) {
-            setError((error as Error).message);
-            setStreamUrl(null);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+    const { isAuthenticated, login, register, userProfile } = useAuth();
 
     useEffect(() => {
-        if (songId){
-            loadStreamUrl(songId);
-        } else {
-            setStreamUrl(null);
-            setError(null);
-        }
-    }, [songId, loadStreamUrl]);
+        const fetchStreamUrl = async () => {
+            if (!songId){
+                setStreamUrl(null);
+                setError(null);
+                return
+            }
 
-    if (!songId) {
-        return null;
+            if (!isAuthenticated){
+                setError('You must be logged in to stream music.');
+                setStreamUrl(null);
+                return;
+            }
+
+            setIsLoading(true);
+            setError(null);
+            try {
+                const streamUrl = await apiService.getStreamUrl(songId);
+                setStreamUrl(streamUrl);
+            } catch (error) {
+                setError('Failed to load stream');
+                setStreamUrl(null);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchStreamUrl();
+    }, [songId, isAuthenticated]);
+
+    if (songId && !isAuthenticated) {
+        return (
+            <div className={"w-full max-w-md mx-auto bg-white border border-gray-200 rounded-xl p-6 text-center"}>
+                <div className={"flex flex-col items-center space-y-4"}>
+                    <svg className={"w-12 h-12 text-gray-400"} fill={"none"} stroke={"currentColor"} viewBox={"0 0 24 24"}>
+                        <path strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={1} d={"M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"}/>
+                    </svg>
+                    <div>
+                        <h3 className={"text-lg font-semibold text-gray-800 mb-2"}>
+                            Join to start streaming
+                        </h3>
+                        <p className={"text-gray-600 mb-4"}>
+                            {userProfile
+                                ? `Welcome back, ${userProfile.displayName}!`
+                                : `Create a free account or sign in to listen to your favorite music.`
+                            }
+                        </p>
+                    </div>
+                    <div className={"flex gap-3 justify-center"}>
+                        <button
+                            onClick={register}
+                            className={"bg-transparent text-green-600 px-4 py-2 rounded-lg border border-green-600 hover:bg-green-50 transition duration-200 font-medium"}>
+                            Sign up
+                        </button>
+                        <button
+                            onClick={login}
+                            className={"bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200 font-medium"}>
+                            Sign in
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (

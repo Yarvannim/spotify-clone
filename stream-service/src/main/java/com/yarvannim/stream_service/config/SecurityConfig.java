@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -31,21 +33,17 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/public/**",
-                                "api/auth/register",
-                                "/error"
-                        ).permitAll()
+                        .requestMatchers("/api/search/**").permitAll()
                         .requestMatchers(
                                 "/api/songs/stream/**",
-                                "/api/songs/search"
+                                "/api/users/sync",
+                                "api/users/me/**"
                         ).hasAnyAuthority("ROLE_USER", "ROLE_ARTIST", "ROLE_ADMIN")
                         .requestMatchers(
                                 "/api/songs/upload"
-
                         ).hasAnyAuthority("ROLE_ARTIST")
                         .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN")
-                        .anyRequest().anonymous()
+                        .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))

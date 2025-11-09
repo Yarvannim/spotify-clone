@@ -69,6 +69,7 @@ services:
       KC_DB: dev-file
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME: "keycloak"
     volumes:
       - keycloak_data:/opt/keycloak/data
       - ./scripts/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
