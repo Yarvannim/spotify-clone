@@ -1,5 +1,5 @@
-import {useCallback} from "react";
-import {useAudioPlayer} from "../hooks/useAudioPlayer.ts";
+import { useCallback} from "react";
+import { useAudioPlayer } from "../hooks/useAudioPlayer.ts";
 
 interface AudioPlayerProps {
     songId: string | null;
@@ -7,9 +7,9 @@ interface AudioPlayerProps {
 }
 
 export const AudioPlayer: React.FC<AudioPlayerProps> = ({songId, streamUrl}) => {
-    const {isPlaying, currentTime, duration, currentSongId, play, pause, resume, seek} = useAudioPlayer();
+    const { isPlaying, currentTime, duration, currentSongId, play, pause, resume, seek } = useAudioPlayer();
 
-    const handlePlayPause = useCallback(() => {
+    const handlePlayPause = useCallback(() =>{
         if (!songId || !streamUrl) return;
         if (currentSongId === songId) {
             if (isPlaying) {
@@ -22,7 +22,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({songId, streamUrl}) => 
         }
     }, [songId, streamUrl, currentSongId, isPlaying, pause, play, resume]);
 
-    const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) =>{
         const time = parseFloat(e.target.value);
         seek(time);
     }, [seek]);
@@ -35,12 +35,10 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({songId, streamUrl}) => 
 
     if (!songId || !streamUrl) {
         return (
-            <div
-                className="w-full max-w-md mx-auto bg-gray-50 border border-gray-200 rounded-xl p-6 text-center text-gray-500">
+            <div className="w-full max-w-md mx-auto bg-gray-50 border border-gray-200 rounded-xl p-6 text-center text-gray-500">
                 <div className="flex items-center justify-center space-x-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                              d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
                     </svg>
                     <span>Select a song to play</span>
                 </div>
