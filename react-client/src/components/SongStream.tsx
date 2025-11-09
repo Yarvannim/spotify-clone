@@ -11,17 +11,19 @@ export const SongStream: React.FC<SongStreamProps> = ({songId}) => {
     const [streamUrl, setStreamUrl] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<String | null>(null);
-    const { isAuthenticated, login } = useAuth();
+    const { isAuthenticated, login, register, userProfile } = useAuth();
 
     useEffect(() => {
         const fetchStreamUrl = async () => {
             if (!songId){
                 setStreamUrl(null);
+                setError(null);
                 return
             }
 
             if (!isAuthenticated){
                 setError('You must be logged in to stream music.');
+                setStreamUrl(null);
                 return;
             }
 
@@ -50,17 +52,27 @@ export const SongStream: React.FC<SongStreamProps> = ({songId}) => {
                     </svg>
                     <div>
                         <h3 className={"text-lg font-semibold text-gray-800 mb-2"}>
-                            Sign in required
+                            Join to start streaming
                         </h3>
-                        <p className={"text-lg font-semibold text-gray-800 mb-2"}>
-                            Please sign in to stream music.
+                        <p className={"text-gray-600 mb-4"}>
+                            {userProfile
+                                ? `Welcome back, ${userProfile.displayName}!`
+                                : `Create a free account or sign in to listen to your favorite music.`
+                            }
                         </p>
                     </div>
-                    <button
-                        onClick={login}
-                        className={"bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200 font-medium"}>
-                        Sign in
-                    </button>
+                    <div className={"flex gap-3 justify-center"}>
+                        <button
+                            onClick={register}
+                            className={"bg-transparent text-green-600 px-4 py-2 rounded-lg border border-green-600 hover:bg-green-50 transition duration-200 font-medium"}>
+                            Sign up
+                        </button>
+                        <button
+                            onClick={login}
+                            className={"bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200 font-medium"}>
+                            Sign in
+                        </button>
+                    </div>
                 </div>
             </div>
         );

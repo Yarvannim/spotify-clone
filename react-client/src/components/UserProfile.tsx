@@ -2,10 +2,35 @@ import React from "react";
 import { useAuth } from "../auth/AuthContext.tsx";
 
 export const UserProfile: React.FC = () => {
-    const { user, logout, isAuthenticated } = useAuth();
+    const { user, userProfile, logout } = useAuth();
+    // const [isEditing, setIsEditing] = useState(false);
+    // const [newDisplayName, setNewDisplayName] = useState(userProfile?.displayName || '');
+    // const [isUpdating, setIsUpdating] = useState(false);
 
-    if (!isAuthenticated || !user) {
-        return null
+    // const handleSaveDisplayName = async () => {
+    //     if (!newDisplayName.trim() || newDisplayName === userProfile?.displayName) {
+    //         setIsEditing(false);
+    //         return;
+    //     }
+    //
+    //     setIsUpdating(true);
+    //     try {
+    //         await updateDisplayName(newDisplayName);
+    //         setIsEditing(false);
+    //     } catch (error) {
+    //         throw new Error('Failed to update display name');
+    //     } finally {
+    //         setIsUpdating(false);
+    //     }
+    // }
+    //
+    // const handleCancelEdit = () => {
+    //     setNewDisplayName(userProfile?.displayName || '');
+    //     setIsEditing(false)
+    // }
+
+    if (!user || !userProfile) {
+        return null;
     }
 
     return (
@@ -16,9 +41,28 @@ export const UserProfile: React.FC = () => {
                         {user.preferred_username?.[0]?.toUpperCase() || user.name?.[0]?.toUpperCase() || 'U'}
                     </span>
                 </div>
-                <span className={"text-gray-700 text-sm font-medium"}>
-                    {user.preferred_username || user.name || 'User'}
-                </span>
+            </div>
+            {/*<div className={"flex flex-col"}>*/}
+            {/*    {isEditing ? (*/}
+            {/*        <div className={"flex items-center gap-2"}>*/}
+            {/*            <input type={"text"} value={newDisplayName} onChange={(e) => setNewDisplayName(e.target.value)} className={"text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-green-500"} disabled={isUpdating} maxLength={50}/>*/}
+            {/*            <div className={"flex gap-1"}>*/}
+            {/*                <button onClick={handleSaveDisplayName} disabled={isUpdating} className={"text-green-600 hover:text-green-800 text-xs disabled:opacity-50"}>✓</button>*/}
+            {/*                <button onClick={handleCancelEdit} disabled={isUpdating} className={"text-red-600 hover:text-red-800 text-xs disabled:opacity-50"}>✗</button>*/}
+            {/*            </div>*/}
+            {/*        </div>*/}
+            {/*    ): (*/}
+            {/*       <div className={"flex items-center gap-2"}>*/}
+            {/*           <span className={"text-gray-700 text-sm font-medium"}>{userProfile.displayName}</span>*/}
+            {/*           <button onClick={() => setIsEditing(true)} className={"text-gray-400 hover:text-gray-600 text-xs transition duration-200"} title={"Edit display name"}>✎</button>*/}
+            {/*       </div>*/}
+            {/*    )}*/}
+            {/*    {userProfile.isArtist && (*/}
+            {/*        <span className={"text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full self-start"}>Artist</span>*/}
+            {/*    )}*/}
+            {/*</div>*/}
+            <div className={"flex items-center gap-2"}>
+                <span className={"text-gray-700 text-sm font-medium"}>{userProfile.displayName}</span>
             </div>
             <button
                 onClick={logout}
