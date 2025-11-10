@@ -38,6 +38,7 @@ public class UserService {
                         existingUser.setDisplayName(displayName);
                         existingUser.setIsArtist(isArtist);
                         existingUser.setUpdatedAt(Instant.now());
+                        existingUser.setLastActiveAt(Instant.now());
                         return userRepository.save(existingUser);
                     }
                     return Mono.just(existingUser);
@@ -48,6 +49,7 @@ public class UserService {
                             username,
                             displayName,
                             isArtist,
+                            Instant.now(),
                             Instant.now(),
                             Instant.now()
                     );

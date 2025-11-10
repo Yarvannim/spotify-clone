@@ -23,4 +23,5 @@ public class User {
     private Boolean isArtist;
     private Instant createdAt;
     private Instant updatedAt;
+    private Instant lastActiveAt;
 }
