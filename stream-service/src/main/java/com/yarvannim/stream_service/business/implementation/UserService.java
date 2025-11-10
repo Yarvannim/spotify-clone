@@ -78,6 +78,14 @@ public class UserService {
                 .switchIfEmpty(Mono.error(new RuntimeException("User not found")));
     }
 
+    public Mono<Void> deleteCurrentUser(Authentication authentication){
+        UUID userId = extractUserIdFromAuthentication(authentication);
+        return userRepository.findByUserId(userId)
+                .switchIfEmpty(Mono.error(new RuntimeException("User not found for deletion")))
+                .flatMap(user -> userRepository.deleteUser(userId))
+                .then();
+    }
+
     public Mono<Boolean> isArtist(UUID userId){
         return userRepository.findByUserId(userId)
                 .map(User::getIsArtist)

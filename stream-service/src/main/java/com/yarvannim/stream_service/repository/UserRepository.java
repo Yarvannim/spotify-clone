@@ -19,4 +19,7 @@ public interface UserRepository extends ReactiveCassandraRepository<User, UUID> 
 
     @Query("UPDATE users SET displayName = ?1, updatedAt = toTimestamp(now()) WHERE userId = ?0")
     Mono<Boolean> updateDisplayName(UUID userId, String displayName);
+
+    @Query("DELETE FROM users WHERE userId = ?0")
+    Mono<Boolean> deleteUser(UUID userId);
 }

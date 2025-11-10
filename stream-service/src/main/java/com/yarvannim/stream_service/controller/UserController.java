@@ -43,4 +43,11 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .onErrorResume(error -> Mono.just(ResponseEntity.ok(false)));
     }
+
+    @DeleteMapping("/me")
+    public Mono<ResponseEntity<Void>> deleteCurrentUser(Authentication authentication){
+        return userService.deleteCurrentUser(authentication)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(error -> Mono.just(ResponseEntity.badRequest().build()));
+    }
 }
