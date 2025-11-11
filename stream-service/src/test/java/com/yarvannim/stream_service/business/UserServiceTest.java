@@ -39,7 +39,7 @@ public class UserServiceTest {
     private final Instant NOW = Instant.now();
 
     private User getMockUser(Boolean isArtist) {
-        return new User(TEST_USER_ID, TEST_USER_NAME, TEST_USER_DISPLAY_NAME, isArtist, NOW, NOW);
+        return new User(TEST_USER_ID, TEST_USER_NAME, TEST_USER_DISPLAY_NAME, isArtist, NOW, NOW, NOW);
     }
 
     private JwtAuthenticationToken createMockAuthToken(String sub, boolean isArtist, String displayName) {
