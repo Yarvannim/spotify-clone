@@ -12,10 +12,13 @@ import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.util.UUID;
 
+import static com.yarvannim.stream_service.business.utils.AuthUtils.extractUserIdFromAuthentication;
+
 @AllArgsConstructor
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final GdprComplianceService gdprComplianceService;
 
 
     public Mono<User> syncUserFromKeycloak(Authentication authentication){
@@ -38,6 +41,7 @@ public class UserService {
                         existingUser.setDisplayName(displayName);
                         existingUser.setIsArtist(isArtist);
                         existingUser.setUpdatedAt(Instant.now());
+                        existingUser.setLastActiveAt(Instant.now());
                         return userRepository.save(existingUser);
                     }
                     return Mono.just(existingUser);
@@ -48,6 +52,7 @@ public class UserService {
                             username,
                             displayName,
                             isArtist,
+                            Instant.now(),
                             Instant.now(),
                             Instant.now()
                     );
@@ -78,19 +83,18 @@ public class UserService {
                 .switchIfEmpty(Mono.error(new RuntimeException("User not found")));
     }
 
+    public Mono<Void> deleteCurrentUser(Authentication authentication){
+        UUID userId = extractUserIdFromAuthentication(authentication);
+        return userRepository.findByUserId(userId)
+                .switchIfEmpty(Mono.error(new RuntimeException("User not found for deletion")))
+                .flatMap(user -> userRepository.deleteUser(userId))
+                .then();
+    }
+
     public Mono<Boolean> isArtist(UUID userId){
         return userRepository.findByUserId(userId)
                 .map(User::getIsArtist)
                 .defaultIfEmpty(false);
-    }
-
-    private UUID extractUserIdFromAuthentication(Authentication authentication){
-        if (!(authentication instanceof JwtAuthenticationToken jwtToken)) {
-            return null;
-        }
-
-        String userIdStr = jwtToken.getToken().getClaimAsString("sub");
-        return UUID.fromString(userIdStr);
     }
 
     public UserResponse toUserResponse(User user){

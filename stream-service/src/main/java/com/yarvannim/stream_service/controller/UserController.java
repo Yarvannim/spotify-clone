@@ -1,5 +1,6 @@
 package com.yarvannim.stream_service.controller;
 
+import com.yarvannim.stream_service.business.implementation.GdprComplianceService;
 import com.yarvannim.stream_service.business.implementation.UserService;
 import com.yarvannim.stream_service.dto.requests.UserUpdateRequest;
 import com.yarvannim.stream_service.dto.responses.UserResponse;
@@ -14,6 +15,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("api/users")
 public class UserController {
     private final UserService userService;
+    private final GdprComplianceService gdprComplianceService;
 
     @PostMapping("/sync")
     public Mono<ResponseEntity<UserResponse>> syncUser(Authentication authentication){
@@ -42,5 +44,19 @@ public class UserController {
                 .map(UserResponse::getIsArtist)
                 .map(ResponseEntity::ok)
                 .onErrorResume(error -> Mono.just(ResponseEntity.ok(false)));
+    }
+
+    @DeleteMapping("/me")
+    public Mono<ResponseEntity<Void>> deleteCurrentUser(Authentication authentication){
+        return userService.deleteCurrentUser(authentication)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(error -> Mono.just(ResponseEntity.badRequest().build()));
+    }
+
+    @GetMapping("/me/export-data")
+    public Mono<ResponseEntity<byte[]>> exportUserData(Authentication authentication){
+        return gdprComplianceService.exportUserData(authentication)
+                .map(data -> ResponseEntity.ok().header("Content-Disposition", "attachment; filename=\"user-data.json\"").body(data))
+                .onErrorResume(error -> Mono.just(ResponseEntity.internalServerError().build()));
     }
 }
