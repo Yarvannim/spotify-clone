@@ -2,6 +2,7 @@ package com.yarvannim.stream_service.controller;
 
 import com.yarvannim.stream_service.business.implementation.GdprComplianceService;
 import com.yarvannim.stream_service.business.implementation.UserService;
+import com.yarvannim.stream_service.domain.entity.UserPrivacyPreferences;
 import com.yarvannim.stream_service.dto.requests.UserUpdateRequest;
 import com.yarvannim.stream_service.dto.responses.UserResponse;
 import lombok.AllArgsConstructor;
@@ -58,5 +59,10 @@ public class UserController {
         return gdprComplianceService.exportUserData(authentication)
                 .map(data -> ResponseEntity.ok().header("Content-Disposition", "attachment; filename=\"user-data.json\"").body(data))
                 .onErrorResume(error -> Mono.just(ResponseEntity.internalServerError().build()));
+    }
+
+    @PostMapping("/me/privacy-preferences")
+    public Mono<UserPrivacyPreferences> updateUserPrivacyPreferences(Authentication authentication){
+
     }
 }
