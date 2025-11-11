@@ -12,10 +12,13 @@ import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.util.UUID;
 
+import static com.yarvannim.stream_service.business.utils.AuthUtils.extractUserIdFromAuthentication;
+
 @AllArgsConstructor
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final GdprComplianceService gdprComplianceService;
 
 
     public Mono<User> syncUserFromKeycloak(Authentication authentication){
@@ -92,15 +95,6 @@ public class UserService {
         return userRepository.findByUserId(userId)
                 .map(User::getIsArtist)
                 .defaultIfEmpty(false);
-    }
-
-    private UUID extractUserIdFromAuthentication(Authentication authentication){
-        if (!(authentication instanceof JwtAuthenticationToken jwtToken)) {
-            return null;
-        }
-
-        String userIdStr = jwtToken.getToken().getClaimAsString("sub");
-        return UUID.fromString(userIdStr);
     }
 
     public UserResponse toUserResponse(User user){

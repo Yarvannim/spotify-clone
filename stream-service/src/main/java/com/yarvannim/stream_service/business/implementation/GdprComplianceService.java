@@ -1,15 +1,22 @@
 package com.yarvannim.stream_service.business.implementation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yarvannim.stream_service.domain.entity.User;
 import com.yarvannim.stream_service.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
+
+import static com.yarvannim.stream_service.business.utils.AuthUtils.extractUserIdFromAuthentication;
 
 @Slf4j
 @AllArgsConstructor
@@ -32,6 +39,22 @@ public class GdprComplianceService {
                         log.info("GDPR inactive users cleanup completed. No users to delete.");
                     }
                 }, error -> log.error("GDPR inactive users cleanup failed.", error));
+    }
+
+    public Mono<byte[]> exportUserData(Authentication authentication){
+        UUID userId = extractUserIdFromAuthentication(authentication);
+
+        return userRepository.findByUserId(userId)
+                .flatMap(user -> {
+                    try {
+                        ObjectMapper mapper = new ObjectMapper();
+                        String userData = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(user);
+                        byte[] userDataBytes = userData.getBytes(StandardCharsets.UTF_8);
+                        return Mono.just(userDataBytes);
+                    } catch (JsonProcessingException e) {
+                        return Mono.error(new RuntimeException("Error processing user data"));
+                    }
+                });
     }
 
     private Mono<User> deleteUserAndAssociatedData(User user){
