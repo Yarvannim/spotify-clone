@@ -11,5 +11,4 @@ public interface UserPrivacyPreferencesReposity extends ReactiveCassandraReposit
 
     @Query("SELECT * FROM user_privacy_preferences WHERE userId = ?0")
     Mono<UserPrivacyPreferences> findByUserId(UUID userId);
-
 }

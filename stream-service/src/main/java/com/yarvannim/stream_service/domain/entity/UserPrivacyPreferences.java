@@ -31,7 +31,7 @@ public class UserPrivacyPreferences {
                 false,
                 false,
                 false,
-                now,
+                null,
                 now
         );
     }

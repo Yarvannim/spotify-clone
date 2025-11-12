@@ -60,9 +60,4 @@ public class UserController {
                 .map(data -> ResponseEntity.ok().header("Content-Disposition", "attachment; filename=\"user-data.json\"").body(data))
                 .onErrorResume(error -> Mono.just(ResponseEntity.internalServerError().build()));
     }
-
-    @PostMapping("/me/privacy-preferences")
-    public Mono<UserPrivacyPreferences> updateUserPrivacyPreferences(Authentication authentication){
-
-    }
 }

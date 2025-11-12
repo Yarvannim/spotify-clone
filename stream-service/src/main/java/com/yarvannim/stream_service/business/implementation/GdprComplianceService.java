@@ -67,7 +67,10 @@ public class GdprComplianceService {
     public Mono<UserPrivacyPreferences> getPrivacyPreferences(Authentication authentication){
         UUID userId = extractUserIdFromAuthentication(authentication);
         return userPrivacyPreferencesReposity.findByUserId(userId)
-                .switchIfEmpty(Mono.defer(() -> userPrivacyPreferencesReposity.save(UserPrivacyPreferences.createDefault(userId))));
+                .switchIfEmpty(Mono.defer(() -> {
+                    UserPrivacyPreferences defaultPreferences = UserPrivacyPreferences.createDefault(userId);
+                    return userPrivacyPreferencesReposity.save(defaultPreferences);
+                }));
     }
 
     public Mono<UserPrivacyPreferences> updatePrivacyPreferences(Authentication authentication, PrivacyPreferencesUpdateRequest request){
